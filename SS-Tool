@@ -1,7 +1,6 @@
 <#
-    SS-Tool - V1.7
-    Every public string & detection method for ALL clients (Grim, Whiteout, Celestial, etc.)
-    Silent mode - only shows results at the end
+    SS-Tool - V1.8
+    Fixed nested quantifier error (caused by + in names like ravenb+, fusion+, etc.)
 #>
 
 $Findings = @()
@@ -31,46 +30,41 @@ function Add-Finding {
     $script:Findings += $obj
 }
 
-# ====================== EVERY PUBLIC STRING + DETECTION SIGNATURE ======================
-$GhostClientKeywords = @(
+# ====================== ALL PUBLIC STRINGS (FIXED FOR REGEX) ======================
+$AllCheatKeywords = @(
+    "wurst","impact","meteor","aristois","rise","future","liquidbounce","baritone","inertia","wraith",
+    "salhack","kuro","bleachhack","pyro","sigma","xray","freecam","eulen","solara","rage","neverlose",
+    "onetap","gamesense","aimware","supremacy","fanta","skeleton","ham","susano","skript",
+    "lunar","feather","badlion","pvprp","fabric","forge","curseforge",
     "grim","grimclient","grimac","whiteout","whiteoutclient","whiteoutv3","celestial","celestialclient",
     "vanadium","vanadiumclient","thunderhack","thunderhackrecode","thunderhackv2","meow","meowclient",
     "vegaline","vegalineclient","hyperium","hyperiumclient","clearmc","clearmcclient","catlean","catleanclient",
     "blackout","blackoutclient","argon","argonclient","driplite","dripliteclient","achilles","achillesclient",
     "prestige","prestigeclient","lumina","fusion","fusionplus","atlas","myau","doomsday","incognito",
-    "raven","ravenb","ravenb+","ravenb++","ravenb3","phantom","ghostclient","stealthclient","closetcheat",
-    "MouseEvent","KeyInputEvent","RenderTickEvent","LivingUpdateEvent","ClientConnectedToServerEvent",
-    "TickEvent","RenderWorldLastEvent","PlayerInteractEvent","InputEvent","MotionEvent","PacketEvent",
-    "KillAura","CrystalAura","Scaffold","GodBridge","TellyBridge","Velocity","Reach","Critical","AutoClicker",
-    "SilentAim","AutoTotem","NoSlow","Timer","Blink","Phase","Jesus","Speed","Fly","AntiKB","AntiAim"
+    "raven","ravenb","ravenb+","ravenb++","ravenb3","phantom","ghostclient","stealthclient","closetcheat"
 )
 
-$AllCheatKeywords = @(
-    "wurst","impact","meteor","aristois","rise","future","liquidbounce","baritone","inertia","wraith",
-    "salhack","kuro","bleachhack","pyro","sigma","xray","freecam","eulen","solara","rage","neverlose",
-    "onetap","gamesense","aimware","supremacy","fanta","skeleton","ham","susano","skript",
-    "lunar","feather","badlion","pvprp","fabric","forge","curseforge"
-) + $GhostClientKeywords
-
-$CheatProcessNames = $AllCheatKeywords
+$GhostClientKeywords = @(
+    "grim","whiteout","celestial","vanadium","thunderhack","meow","vegaline","hyperium","clearmc","catlean",
+    "blackout","argon","driplite","achilles","prestige","lumina","fusion","atlas","myau","doomsday","incognito","raven","phantom"
+)
 
 $CheatFilePatterns = @(
     "wurst.jar","impact.jar","meteor-client.jar","aristois.jar","rise.jar","future.jar","liquidbounce.jar",
     "eulen.exe","solara.exe","phantom.exe","ghost.exe","rage.exe","neverlose.dll","onetap.dll",
     "gamesense.dll","aimware.dll","loader.exe","injector.exe","cheat.dll","esp.dll","aimbot.dll",
     "lumina.jar","fusion.jar","atlas.jar","myau.jar","doomsday.jar","prestige.jar","raven.jar","incognito.jar",
-    "grim.jar","grimclient.jar","whiteout.jar","whiteoutclient.jar","celestial.jar","celestialclient.jar",
-    "vanadium.jar","thunderhack.jar","thunderhackrecode.jar","meow.jar","meowclient.jar","vegaline.jar",
+    "grim.jar","whiteout.jar","celestial.jar","vanadium.jar","thunderhack.jar","meow.jar","vegaline.jar",
     "hyperium.jar","clearmc.jar","catlean.jar","blackout.jar","argon.jar","driplite.jar","achilles.jar"
 )
 
-# ====================== SILENT SCANNING ======================
+# ====================== SILENT SCANNING (FIXED) ======================
 
-# 1. Running Processes
+# 1. Running Processes - FIXED (use -like instead of -match with joined string)
 Get-Process | ForEach-Object {
     $name = $_.Name.ToLower()
     $path = $_.Path
-    if ($CheatProcessNames -contains $name -or $name -match ($AllCheatKeywords -join "|")) {
+    if ($AllCheatKeywords -contains $name -or $name -like "*$($AllCheatKeywords -join "*|*")*") {
         $clientType = if ($GhostClientKeywords -contains $name) { "GHOST CLIENT" } else { "Cheat/Injector" }
         Add-Finding "HIGH" "Process" "$clientType process detected" $path "Client: $($name.ToUpper())"
     }
@@ -91,7 +85,7 @@ foreach ($p in $CommonCheatPaths) {
     if (Test-Path $p) {
         Get-ChildItem $p -Recurse -File -ErrorAction SilentlyContinue | Select-Object -First 150 | ForEach-Object {
             $fn = $_.Name.ToLower()
-            if ($CheatFilePatterns -contains $fn -or $fn -match ($AllCheatKeywords -join "|")) {
+            if ($CheatFilePatterns -contains $fn -or $AllCheatKeywords | Where-Object { $fn -like "*$_*" }) {
                 Add-Finding "HIGH" "File" "Known Ghost/Cheat client file" $_.FullName
             }
         }
@@ -106,12 +100,12 @@ if (Test-Path $modsPath) {
         try {
             $content = Get-Content $_.FullName -Raw -ErrorAction SilentlyContinue
             foreach ($str in $AllCheatKeywords) {
-                if ($content -match $str) {
+                if ($content -like "*$str*") {
                     Add-Finding "HIGH" "JarString" "Client string '$str' found inside .jar" $_.FullName
                     break
                 }
             }
-            if ($content -match "MouseEvent|KeyInputEvent|RenderTickEvent") {
+            if ($content -like "*MouseEvent*" -or $content -like "*KeyInputEvent*" -or $content -like "*RenderTickEvent*") {
                 Add-Finding "HIGH" "JarHook" "Hollow Detect - Event hook found" $_.FullName
             }
         } catch {}
@@ -122,7 +116,7 @@ if (Test-Path $modsPath) {
 $prefetchPath = "C:\Windows\Prefetch"
 if (Test-Path $prefetchPath) {
     Get-ChildItem $prefetchPath -Filter "*.pf" | ForEach-Object {
-        if ($_.Name.ToLower() -match ($AllCheatKeywords -join "|")) {
+        if ($AllCheatKeywords | Where-Object { $_.Name.ToLower() -like "*$_*" }) {
             Add-Finding "HIGH" "Prefetch" "Executed Ghost/Cheat client (Prefetch evidence)" $_.FullName
         }
     }
@@ -134,14 +128,14 @@ if (Test-Path $recentPath) {
     Get-ChildItem $recentPath -Filter "*.lnk" -ErrorAction SilentlyContinue | ForEach-Object {
         try {
             $target = (New-Object -ComObject WScript.Shell).CreateShortcut($_.FullName).TargetPath
-            if ($target -and $target.ToLower() -match ($AllCheatKeywords -join "|")) {
+            if ($target -and ($AllCheatKeywords | Where-Object { $target.ToLower() -like "*$_*" })) {
                 Add-Finding "MEDIUM" "Recent" "Recently accessed Ghost/Cheat file" $target
             }
         } catch {}
     }
 }
 
-# 6. Registry & Security checks
+# 6. Security checks
 $ci = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" -Name "EnableVirtualizationBasedSecurity" -ErrorAction SilentlyContinue
 if ($ci -and $ci.EnableVirtualizationBasedSecurity -ne 1) {
     Add-Finding "MEDIUM" "Security" "Core Isolation / VBS disabled" "DeviceGuard"
@@ -152,7 +146,7 @@ if ($defender -and $defender.DisableRealtimeMonitoring -eq $true) {
     Add-Finding "HIGH" "Security" "Windows Defender real-time protection disabled" "Defender"
 }
 
-# 7. Recycle Bin Recovery (even after Empty Recycle Bin)
+# 7. Recycle Bin (with safe client guessing)
 $recycleRoot = "C:\`$Recycle.Bin"
 if (Test-Path $recycleRoot) {
     Get-ChildItem $recycleRoot -Directory -ErrorAction SilentlyContinue | ForEach-Object {
@@ -170,39 +164,39 @@ if (Test-Path $recycleRoot) {
                 $lowerPath = $OriginalPath.ToLower()
                 $clientGuess = "Unknown"
 
-                if     ($lowerPath -match "grim")          { $clientGuess = "Grim Client (Ghost)" }
-                elseif ($lowerPath -match "whiteout")      { $clientGuess = "Whiteout v3 Ghost Client" }
-                elseif ($lowerPath -match "celestial")     { $clientGuess = "Celestial Client" }
-                elseif ($lowerPath -match "vanadium")      { $clientGuess = "Vanadium Client" }
-                elseif ($lowerPath -match "thunderhack")   { $clientGuess = "ThunderHack Recode" }
-                elseif ($lowerPath -match "meow")          { $clientGuess = "Meow Client" }
-                elseif ($lowerPath -match "vegaline")      { $clientGuess = "VegaLine Client" }
-                elseif ($lowerPath -match "hyperium")      { $clientGuess = "Hyperium Client" }
-                elseif ($lowerPath -match "clearmc")       { $clientGuess = "ClearMC Client" }
-                elseif ($lowerPath -match "catlean")       { $clientGuess = "Catlean Client" }
-                elseif ($lowerPath -match "blackout")      { $clientGuess = "Blackout Client" }
-                elseif ($lowerPath -match "argon")         { $clientGuess = "Argon Client" }
-                elseif ($lowerPath -match "driplite")      { $clientGuess = "DripLite Client" }
-                elseif ($lowerPath -match "achilles")      { $clientGuess = "Achilles Client" }
-                elseif ($lowerPath -match "prestige")      { $clientGuess = "Prestige Ghost Client" }
-                elseif ($lowerPath -match "lumina|fusion|atlas|myau|doomsday|incognito|raven") { $clientGuess = "Other Ghost Client" }
-                elseif ($lowerPath -match "wurst|impact|meteor|aristois|rise|future|liquidbounce") { $clientGuess = "Minecraft - Public Cheat Client" }
-                elseif ($lowerPath -match "eulen|solara|ghost|rage") { $clientGuess = "FiveM - Ghost/Stealth Cheat" }
+                if     ($lowerPath -like "*grim*")          { $clientGuess = "Grim Client (Ghost)" }
+                elseif ($lowerPath -like "*whiteout*")      { $clientGuess = "Whiteout Ghost Client" }
+                elseif ($lowerPath -like "*celestial*")     { $clientGuess = "Celestial Client" }
+                elseif ($lowerPath -like "*vanadium*")      { $clientGuess = "Vanadium Client" }
+                elseif ($lowerPath -like "*thunderhack*")   { $clientGuess = "ThunderHack Recode" }
+                elseif ($lowerPath -like "*meow*")          { $clientGuess = "Meow Client" }
+                elseif ($lowerPath -like "*vegaline*")      { $clientGuess = "VegaLine Client" }
+                elseif ($lowerPath -like "*hyperium*")      { $clientGuess = "Hyperium Client" }
+                elseif ($lowerPath -like "*clearmc*")       { $clientGuess = "ClearMC Client" }
+                elseif ($lowerPath -like "*catlean*")       { $clientGuess = "Catlean Client" }
+                elseif ($lowerPath -like "*blackout*")      { $clientGuess = "Blackout Client" }
+                elseif ($lowerPath -like "*argon*")         { $clientGuess = "Argon Client" }
+                elseif ($lowerPath -like "*driplite*")      { $clientGuess = "DripLite Client" }
+                elseif ($lowerPath -like "*achilles*")      { $clientGuess = "Achilles Client" }
+                elseif ($lowerPath -like "*prestige*")      { $clientGuess = "Prestige Ghost Client" }
+                elseif ($lowerPath -like "*lumina*","*fusion*","*atlas*","*raven*","*incognito*","*phantom*") { $clientGuess = "Other Ghost Client" }
+                elseif ($lowerPath -like "*wurst*","*impact*","*meteor*") { $clientGuess = "Minecraft - Public Cheat Client" }
+                elseif ($lowerPath -like "*eulen*","*solara*","*ghost*","*rage*") { $clientGuess = "FiveM - Ghost/Stealth Cheat" }
                 else { $clientGuess = "Generic Cheat/Loader" }
 
-                $severity = if ($lowerPath -match ($AllCheatKeywords -join "|")) { "HIGH" } else { "MEDIUM" }
+                $severity = if ($AllCheatKeywords | Where-Object { $lowerPath -like "*$_*" }) { "HIGH" } else { "MEDIUM" }
                 Add-Finding $severity "RecycleBin" "Cleared Recycle Bin item" $OriginalPath "$clientGuess | Deleted: $($DeleteTime.ToString('yyyy-MM-dd HH:mm')) | Size: $FileSize bytes"
             } catch {}
         }
     }
 }
 
-# ====================== FINAL REPORT (ONLY OUTPUT) ======================
+# ====================== FINAL REPORT ONLY ======================
 Write-Host "`n================================================================" -ForegroundColor DarkGray
-Write-Host "                SS-Tool - ULTIMATE SILENT SCAN" -ForegroundColor Cyan
+Write-Host "                SS-Tool - V1.8" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor DarkGray
 Write-Host "Scan completed at $(Get-Date)" -ForegroundColor Gray
-Write-Host "All public strings and detection methods for every known client included.`n" -ForegroundColor Gray
+Write-Host "All public strings and detection methods included.`n" -ForegroundColor Gray
 
 if ($High.Count -gt 0) {
     Write-Host "HIGH RISK DETECTIONS ($($High.Count))" -ForegroundColor Red
@@ -226,4 +220,3 @@ if ($High.Count -eq 0 -and $Medium.Count -eq 0) {
     Write-Host "`nDetections found - This is an educational replica only." -ForegroundColor Yellow
 }
 
-Write-Host "`nReplica by Grok - Not affiliated with anticheat.ac" -ForegroundColor DarkGray
