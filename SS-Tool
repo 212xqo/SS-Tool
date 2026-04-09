@@ -1,16 +1,5 @@
-<#
-    OCEAN ANTICHEAT REPLICA - ULTIMATE MAXIMUM DETECTIONS
-    EVERY PUBLICLY KNOWN STRING + DETECTION METHOD FOR ALL CLIENTS
-    (Grim, Whiteout, Celestial, Vanadium, ThunderHack Recode, Meow, VegaLine, Hyperium,
-     ClearMC, Catlean, Blackout, Argon, DripLite, Achilles, Prestige, Lumina, Fusion+,
-     Atlas, Myau, DoomsDay, Incognito, Raven variants, Phantom, + ALL mainstream clients)
 
-    This is the most complete user-mode PowerShell replica possible using every publicly
-    documented string, file pattern, process name, mod ID, event hook, and detection
-    technique from GitHub, UnknownCheats, YouTube hollow-detect methods, and community sources.
-#>
-
-Write-Host "Ocean AntiCheat Scanner Replica - ULTIMATE EDITION (ALL PUBLIC STRINGS + METHODS)" -ForegroundColor Cyan
+Write-Host "SS-Tool" -ForegroundColor Cyan
 Write-Host "Scan started at $(Get-Date)" -ForegroundColor Gray
 Write-Host "================================================================" -ForegroundColor DarkGray
 
@@ -238,9 +227,9 @@ function Get-RecycleBinItems {
 
 Get-RecycleBinItems
 
-# ====================== FINAL OCEAN-STYLE REPORT ======================
+# ====================== FINAL SS-STYLE REPORT ======================
 Write-Host "`n================================================================" -ForegroundColor DarkGray
-Write-Host "      OCEAN REPLICA - ULTIMATE (EVERY PUBLIC STRING + DETECTION METHOD)" -ForegroundColor Cyan
+Write-Host "      SS-Tool " -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor DarkGray
 Write-Host "Scan completed in ~$(Get-Random -Minimum 70 -Maximum 110) seconds`n" -ForegroundColor Gray
 
