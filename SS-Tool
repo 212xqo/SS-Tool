@@ -1,16 +1,13 @@
 <#
-    SS-Tool - OPTIMIZED + PARALLEL + PROGRESS + HTML EXPORT
-    Fastest version with real progress and automatic report
+    SS-Tool - FIXED + OPTIMIZED + PARALLEL SCAN
+    Progress bar + Automatic HTML report
 #>
 
 $Findings = @()
-$High = @()
-$Medium = @()
-$Low = @()
 
 function Add-Finding {
     param([string]$Severity, [string]$Category, [string]$Description, [string]$Path = "N/A", [string]$Extra = "")
-    $obj = [PSCustomObject]@{
+    $Findings += [PSCustomObject]@{
         Severity    = $Severity
         Category    = $Category
         Description = $Description
@@ -18,9 +15,6 @@ function Add-Finding {
         Extra       = $Extra
         Time        = (Get-Date -Format "HH:mm:ss")
     }
-    if ($Severity -eq "HIGH") { $script:High += $obj }
-    elseif ($Severity -eq "MEDIUM") { $script:Medium += $obj }
-    else { $script:Low += $obj }
 }
 
 # Keywords
@@ -30,15 +24,10 @@ $GhostClientKeywords = @("grim","whiteout","celestial","vanadium","thunderhack",
 
 $CheatFilePatterns = @("wurst.jar","impact.jar","meteor-client.jar","aristois.jar","rise.jar","future.jar","liquidbounce.jar","eulen.exe","solara.exe","phantom.exe","ghost.exe","rage.exe","neverlose.dll","onetap.dll","gamesense.dll","aimware.dll","loader.exe","injector.exe","cheat.dll","esp.dll","aimbot.dll","lumina.jar","fusion.jar","atlas.jar","myau.jar","doomsday.jar","prestige.jar","raven.jar","incognito.jar","grim.jar","whiteout.jar","celestial.jar","vanadium.jar","thunderhack.jar","meow.jar","vegaline.jar","hyperium.jar","clearmc.jar","catlean.jar","blackout.jar","argon.jar","driplite.jar","achilles.jar")
 
-# ====================== COLLECT FILES EFFICIENTLY ======================
+# ====================== COLLECT FILES ======================
 Write-Host "Preparing optimized scan..." -ForegroundColor Yellow
 
-$DeepScanPaths = @(
-    "C:\Windows\System32", "C:\Windows\System32\drivers",
-    "C:\Program Files", "C:\Program Files (x86)",
-    "$env:APPDATA", "$env:LOCALAPPDATA", "$env:TEMP",
-    "$env:USERPROFILE\Downloads", "$env:USERPROFILE\Desktop"
-)
+$DeepScanPaths = @("C:\Windows\System32", "C:\Windows\System32\drivers", "C:\Program Files", "C:\Program Files (x86)", "$env:APPDATA", "$env:LOCALAPPDATA", "$env:TEMP", "$env:USERPROFILE\Downloads", "$env:USERPROFILE\Desktop")
 
 $AllFiles = @()
 foreach ($path in $DeepScanPaths) {
@@ -53,24 +42,26 @@ if (Test-Path $modsPath) {
 }
 
 $totalFiles = $AllFiles.Count
-Write-Host "Starting parallel scan of $totalFiles files..." -ForegroundColor Cyan
-
-# ====================== PARALLEL SCAN WITH PROGRESS ======================
 $processed = 0
 
-$AllFiles | ForEach-Object -Parallel {
+Write-Host "Starting parallel scan of $totalFiles files..." -ForegroundColor Cyan
+
+# ====================== PARALLEL SCAN (FIXED) ======================
+$scanResults = $AllFiles | ForEach-Object -Parallel {
     $file = $_
+    $localFindings = @()
+
     $global:processed++
     $percent = [math]::Round(($using:processed / $using:totalFiles) * 100, 1)
 
-    if ($global:processed % 30 -eq 0) {
-        Write-Progress -Activity "SS-Tool Deep Scan" -Status "Processing $global:processed of $using:totalFiles ($percent%)" -PercentComplete $percent
+    if ($global:processed % 40 -eq 0) {
+        Write-Progress -Activity "SS-Tool Deep Scan" -Status "Processing $($global:processed) of $($using:totalFiles) ($percent%)" -PercentComplete $percent
     }
 
     $fn = $file.Name.ToLower()
 
     if ($using:CheatFilePatterns -contains $fn -or ($using:AllCheatKeywords | Where-Object { $fn -like "*$_*" })) {
-        $using:Findings += [PSCustomObject]@{
+        $localFindings += [PSCustomObject]@{
             Severity = "HIGH"; Category = "SystemFile"; Description = "Suspicious cheat-related file"; Path = $file.FullName
         }
     }
@@ -80,7 +71,7 @@ $AllFiles | ForEach-Object -Parallel {
             $content = Get-Content $file.FullName -Raw -ErrorAction SilentlyContinue
             foreach ($str in $using:AllCheatKeywords) {
                 if ($content -like "*$str*") {
-                    $using:Findings += [PSCustomObject]@{
+                    $localFindings += [PSCustomObject]@{
                         Severity = "HIGH"; Category = "StringMatch"; Description = "Client string '$str' found"; Path = $file.FullName
                     }
                     break
@@ -88,23 +79,29 @@ $AllFiles | ForEach-Object -Parallel {
             }
         } catch {}
     }
-} -ThrottleLimit 8   # Adjust based on your CPU (8 is good balance)
 
-# Quick checks (Processes, Security, Recycle Bin)
+    $localFindings
+} -ThrottleLimit 6   # Safe number for most systems
+
+$Findings = $scanResults
+
+# ====================== QUICK CHECKS ======================
 Get-Process | ForEach-Object {
     $name = $_.Name.ToLower()
     if ($AllCheatKeywords -contains $name -or ($AllCheatKeywords | Where-Object { $name -like "*$_*" })) {
         $type = if ($GhostClientKeywords -contains $name) { "GHOST CLIENT" } else { "Cheat" }
-        Add-Finding "HIGH" "Process" "$type process detected" $_.Path "Client: $($name.ToUpper())"
+        $Findings += [PSCustomObject]@{
+            Severity = "HIGH"; Category = "Process"; Description = "$type process detected"; Path = $_.Path; Extra = "Client: $($name.ToUpper())"
+        }
     }
 }
 
-# Security
+# Security checks
 if ((Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\DeviceGuard" -Name "EnableVirtualizationBasedSecurity" -EA SilentlyContinue).EnableVirtualizationBasedSecurity -ne 1) {
-    Add-Finding "MEDIUM" "Security" "Core Isolation / VBS disabled" "DeviceGuard"
+    $Findings += [PSCustomObject]@{ Severity = "MEDIUM"; Category = "Security"; Description = "Core Isolation / VBS disabled"; Path = "DeviceGuard" }
 }
 if ((Get-MpPreference -EA SilentlyContinue).DisableRealtimeMonitoring -eq $true) {
-    Add-Finding "HIGH" "Security" "Windows Defender real-time protection disabled" "Defender"
+    $Findings += [PSCustomObject]@{ Severity = "HIGH"; Category = "Security"; Description = "Windows Defender real-time protection disabled"; Path = "Defender" }
 }
 
 Write-Progress -Activity "SS-Tool Deep Scan" -Completed
@@ -112,12 +109,15 @@ Write-Progress -Activity "SS-Tool Deep Scan" -Completed
 # ====================== FINAL REPORT + HTML EXPORT ======================
 $reportPath = "$env:USERPROFILE\Desktop\SS-Tool-Report-$(Get-Date -Format 'yyyyMMdd-HHmmss').html"
 
+$High = $Findings | Where-Object Severity -eq "HIGH"
+$Medium = $Findings | Where-Object Severity -eq "MEDIUM"
+
 $html = @"
 <html><head><title>SS-Tool Scan Report</title>
-<style>body{font-family:Consolas;background:#111;color:#0f0;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #333;padding:8px;} th{background:#222;}</style>
+<style>body{font-family:Consolas;background:#0d0d0d;color:#0f0;} h1,h2{color:#0f0;} table{border-collapse:collapse;width:100%;} th,td{border:1px solid #333;padding:8px;} th{background:#1a1a1a;}</style>
 </head><body>
 <h1>SS-Tool - Deep Scan Report</h1>
-<p>Scan completed at $(Get-Date) | Total files scanned: $totalFiles</p>
+<p>Completed at $(Get-Date) | Files scanned: $totalFiles</p>
 "@
 
 if ($High.Count -gt 0) {
@@ -125,19 +125,20 @@ if ($High.Count -gt 0) {
     $html += $High | ConvertTo-Html -Fragment
 }
 if ($Medium.Count -gt 0) {
-    $html += "<h2 style='color:yellow'>MEDIUM WARNINGS ($($Medium.Count))</h2>"
+    $html += "<h2 style='color:orange'>MEDIUM WARNINGS ($($Medium.Count))</h2>"
     $html += $Medium | ConvertTo-Html -Fragment
 }
 
-$html += "<p style='color:gray'>Educational replica only - Not affiliated with anticheat.ac</p></body></html>"
+$html += "<p style='color:gray'>Educational replica only • Not affiliated with anticheat.ac</p></body></html>"
 
 $html | Out-File -FilePath $reportPath -Encoding UTF8
 
+# Console Report
 Write-Host "`n================================================================" -ForegroundColor DarkGray
-Write-Host "                SS-Tool - OPTIMIZED SCAN COMPLETE" -ForegroundColor Cyan
+Write-Host "                SS-Tool - SCAN COMPLETE" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor DarkGray
-Write-Host "Total files scanned : $totalFiles" -ForegroundColor Gray
-Write-Host "Report saved to     : $reportPath" -ForegroundColor Green
+Write-Host "Files scanned : $totalFiles" -ForegroundColor Gray
+Write-Host "Report saved  : $reportPath" -ForegroundColor Green
 
 if ($High.Count -gt 0) {
     Write-Host "`nHIGH RISK DETECTIONS ($($High.Count))" -ForegroundColor Red
@@ -145,12 +146,12 @@ if ($High.Count -gt 0) {
 }
 
 if ($Medium.Count -gt 0) {
-    Write-Host "`nMEDIUM / WARNING DETECTIONS ($($Medium.Count))" -ForegroundColor Yellow
+    Write-Host "`nMEDIUM WARNINGS ($($Medium.Count))" -ForegroundColor Yellow
     $Medium | Format-Table -AutoSize
 }
 
 if ($High.Count -eq 0 -and $Medium.Count -eq 0) {
-    Write-Host "`nNo high or medium risk detections found." -ForegroundColor Green
+    Write-Host "`nNo detections found." -ForegroundColor Green
 }
 
-Write-Host "`nScan finished. HTML report saved to Desktop." -ForegroundColor Cyan
+Write-Host "`nScan finished." -ForegroundColor Cyan
