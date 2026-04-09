@@ -1,5 +1,5 @@
 <#
-    OCEAN ANTICHEAT REPLICA - ULTIMATE SILENT EDITION
+    SS-Tool - V1.7
     Every public string & detection method for ALL clients (Grim, Whiteout, Celestial, etc.)
     Silent mode - only shows results at the end
 #>
@@ -199,7 +199,7 @@ if (Test-Path $recycleRoot) {
 
 # ====================== FINAL REPORT (ONLY OUTPUT) ======================
 Write-Host "`n================================================================" -ForegroundColor DarkGray
-Write-Host "                OCEAN REPLICA - ULTIMATE SILENT SCAN" -ForegroundColor Cyan
+Write-Host "                SS-Tool - ULTIMATE SILENT SCAN" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor DarkGray
 Write-Host "Scan completed at $(Get-Date)" -ForegroundColor Gray
 Write-Host "All public strings and detection methods for every known client included.`n" -ForegroundColor Gray
