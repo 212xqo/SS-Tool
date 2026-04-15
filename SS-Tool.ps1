@@ -1,3 +1,7 @@
+# SS-Tool Downloader - Downloads to Downloads folder
+
+$downloadsPath = [Environment]::GetFolderPath("Downloads")
+
 $tools = @(
 "1=SystemInformer=https://github.com/winsiderss/si-builds/releases/download/3.2.25275.112/systeminformer-build-canary-setup.exe",
 "2=Everything=https://www.voidtools.com/Everything-1.4.1.1029.x64-Setup.exe",
@@ -63,7 +67,10 @@ Clear-Host
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "          SS-Tool Downloader" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "`nSelect the tool(s) you want to download:`n" -ForegroundColor Yellow
+Write-Host "`nAll files will be downloaded to your Downloads folder" -ForegroundColor Yellow
+Write-Host "Downloads Path: $downloadsPath`n" -ForegroundColor Gray
+
+Write-Host "Select the tool(s) you want to download:`n" -ForegroundColor Yellow
 
 foreach($t in $tools) {
     $parts = $t -split '='
@@ -86,10 +93,12 @@ foreach($num in $selected) {
         $url = $parts[2]
         $fileName = $url.Split('/')[-1]
 
+        $fullPath = Join-Path $downloadsPath $fileName
+
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
         try {
-            Invoke-WebRequest -Uri $url -OutFile $fileName -UseBasicParsing
-            Write-Host "✓ Saved: $fileName" -ForegroundColor Yellow
+            Invoke-WebRequest -Uri $url -OutFile $fullPath -UseBasicParsing
+            Write-Host "✓ Saved to Downloads: $fileName" -ForegroundColor Yellow
         } catch {
             Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
         }
@@ -100,6 +109,6 @@ foreach($num in $selected) {
 
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host "All downloads completed!" -ForegroundColor Cyan
-Write-Host "Files are saved in the current folder." -ForegroundColor Cyan
+Write-Host "Files are saved in your Downloads folder." -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Pause
