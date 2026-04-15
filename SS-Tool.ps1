@@ -1,4 +1,4 @@
-# SS-Tool Downloader - Downloads to Downloads folder
+# SS-Tool Downloader - Downloads to Downloads folder + Download All option
 
 $downloadsPath = [Environment]::GetFolderPath("Downloads")
 
@@ -67,22 +67,23 @@ Clear-Host
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "          SS-Tool Downloader" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "`nAll files will be downloaded to your Downloads folder" -ForegroundColor Yellow
-Write-Host "Downloads Path: $downloadsPath`n" -ForegroundColor Gray
+Write-Host "`nAll files will be saved to your Downloads folder" -ForegroundColor Yellow
+Write-Host "Path: $downloadsPath`n" -ForegroundColor Gray
 
-Write-Host "Select the tool(s) you want to download:`n" -ForegroundColor Yellow
-
+Write-Host "Select tool(s) to download:`n" -ForegroundColor Yellow
 foreach($t in $tools) {
     $parts = $t -split '='
-    $num = $parts[0]
-    $name = $parts[1]
-    Write-Host "$num. $name"
+    Write-Host "$($parts[0]). $($parts[1])"
 }
+Write-Host "99. Download All`n" -ForegroundColor Green
 
-Write-Host "`n" 
-$selection = Read-Host "Enter number(s) separated by comma (e.g. 1,5,12,23)"
+$selection = Read-Host "Enter number(s) separated by comma (or 99 for all)"
 
-$selected = $selection -split ',' | ForEach-Object { $_.Trim() }
+if ($selection.Trim() -eq "99") {
+    $selected = 1..58
+} else {
+    $selected = $selection -split ',' | ForEach-Object { $_.Trim() }
+}
 
 foreach($num in $selected) {
     $idx = [int]$num - 1
@@ -92,23 +93,21 @@ foreach($num in $selected) {
         $toolName = $parts[1]
         $url = $parts[2]
         $fileName = $url.Split('/')[-1]
-
         $fullPath = Join-Path $downloadsPath $fileName
 
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
         try {
             Invoke-WebRequest -Uri $url -OutFile $fullPath -UseBasicParsing
-            Write-Host "✓ Saved to Downloads: $fileName" -ForegroundColor Yellow
+            Write-Host "✓ Saved: $fileName" -ForegroundColor Yellow
         } catch {
-            Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
+            Write-Host "✗ Failed: $toolName" -ForegroundColor Red
         }
-    } else {
+    } elseif ($num -ne 99) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
     }
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "All downloads completed!" -ForegroundColor Cyan
-Write-Host "Files are saved in your Downloads folder." -ForegroundColor Cyan
+Write-Host "Download finished! Check your Downloads folder." -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Pause
