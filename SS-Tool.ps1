@@ -1,4 +1,4 @@
-# SS-Tool Downloader - Saves to real Downloads folder + Download All
+# SS-Tool Downloader - Saves to real Downloads folder
 
 # Most reliable way to get the actual Downloads folder
 $shell = New-Object -ComObject Shell.Application
@@ -77,11 +77,11 @@ foreach($t in $tools) {
     $parts = $t -split '='
     Write-Host "$($parts[0]). $($parts[1])"
 }
-Write-Host "99. Download All`n" -ForegroundColor Green
+Write-Host "59. Download All`n" -ForegroundColor Green
 
-$selection = Read-Host "Enter number(s) separated by comma (or 99 for all)"
+$selection = Read-Host "Enter number(s) separated by comma (or 59 for all)"
 
-if ($selection.Trim() -eq "99") {
+if ($selection.Trim() -eq "59") {
     $selected = 1..58
 } else {
     $selected = $selection -split ',' | ForEach-Object { $_.Trim() }
@@ -106,7 +106,7 @@ foreach($num in $selected) {
             Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
             Write-Host "   $($_.Exception.Message)" -ForegroundColor Red
         }
-    } elseif ($num -ne 99) {
+    } elseif ($num -ne 59) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
     }
 }
