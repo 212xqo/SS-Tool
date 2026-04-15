@@ -1,10 +1,15 @@
-# SS-Tool Downloader - Fixed version with Download All
+# SS-Tool Downloader - Saves to real Downloads folder + Download All
 
-# More reliable Downloads folder detection
-$downloadsPath = Join-Path ([Environment]::GetFolderPath("UserProfile")) "Downloads"
-if (-not (Test-Path $downloadsPath)) {
-    $downloadsPath = "$env:USERPROFILE\Downloads"
-}
+# Most reliable way to get the actual Downloads folder
+$shell = New-Object -ComObject Shell.Application
+$downloadsPath = $shell.Namespace('shell:Downloads').Self.Path
+
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "          SS-Tool Downloader" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "`nFiles will be saved to your Downloads folder:" -ForegroundColor Yellow
+Write-Host $downloadsPath -ForegroundColor White
+Write-Host "`n"
 
 $tools = @(
 "1=SystemInformer=https://github.com/winsiderss/si-builds/releases/download/3.2.25275.112/systeminformer-build-canary-setup.exe",
@@ -67,14 +72,6 @@ $tools = @(
 "58=AmcacheParser=https://github.com/EricZimmerman/AmcacheParser/releases/latest/download/AmcacheParser.exe"
 )
 
-Clear-Host
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "          SS-Tool Downloader" -ForegroundColor Cyan
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "`nFiles will be saved to:" -ForegroundColor Yellow
-Write-Host $downloadsPath -ForegroundColor Gray
-Write-Host "`n"
-
 Write-Host "Select tool(s) to download:`n" -ForegroundColor Yellow
 foreach($t in $tools) {
     $parts = $t -split '='
@@ -102,13 +99,12 @@ foreach($num in $selected) {
 
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
         try {
-            # More reliable download method using WebClient
             $wc = New-Object System.Net.WebClient
             $wc.DownloadFile($url, $fullPath)
             Write-Host "✓ Saved: $fileName" -ForegroundColor Yellow
         } catch {
             Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
-            Write-Host "   Error: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "   $($_.Exception.Message)" -ForegroundColor Red
         }
     } elseif ($num -ne 99) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
@@ -116,7 +112,7 @@ foreach($num in $selected) {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "Finished! Check your Downloads folder:" -ForegroundColor Cyan
+Write-Host "All done! Open your Downloads folder in File Explorer to see the files." -ForegroundColor Cyan
 Write-Host $downloadsPath -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Cyan
 Pause
