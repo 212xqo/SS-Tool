@@ -65,24 +65,20 @@ $tools = @(
 "53=SrumECmd=https://download.ericzimmermanstools.com/net9/SrumECmd.zip",
 "54=bstrings=https://download.ericzimmermanstools.com/net9/bstrings.zip",
 "55=RecentFileCacheParser=https://download.ericzimmermanstools.com/net9/RecentFileCacheParser.zip",
-"56=AppCompatCacheParser=https://download.ericzimmermanstools.com/net9/AppCompatCacheParser.zip",
-"57=AmcacheParser=https://download.ericzimmermanstools.com/net9/AmcacheParser.zip",
-"58=Journal=https://dl.echo.ac/tool/journal",
-"59=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
-"60=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
-"61=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
-"62=RBCmd=https://download.ericzimmermanstools.com/net9/RBCmd.zip",
-"63=Hasher=https://download.ericzimmermanstools.com/hasher.zip",
-"64=EZViewer=https://download.ericzimmermanstools.com/net9/EZViewer.zip",
-"65=MFTExplorer=https://download.ericzimmermanstools.com/net9/MFTExplorer.zip",
-"66=SDBExplorer=https://download.ericzimmermanstools.com/net9/SDBExplorer.zip",
-"67=SQLECmd=https://download.ericzimmermanstools.com/net9/SQLECmd.zip",
-"68=WxTCmd=https://download.ericzimmermanstools.com/net9/WxTCmd.zip",
-"69=ProduKey=https://www.nirsoft.net/utils/produkey-x64.zip",
-"70=ChromeCacheView=https://www.nirsoft.net/utils/chromecacheview.zip",
-"71=BrowsingHistoryView=https://www.nirsoft.net/utils/browsinghistoryview-x64.zip",
-"72=VideoCacheView=https://www.nirsoft.net/utils/videocacheview-x64.zip",
-"73=MyLastSearch=https://www.nirsoft.net/utils/mylastsearch.zip"
+"56=Journal=https://dl.echo.ac/tool/journal",
+"57=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
+"58=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
+"59=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
+"60=RBCmd=https://download.ericzimmermanstools.com/net9/RBCmd.zip",
+"61=Hasher=https://download.ericzimmermanstools.com/hasher.zip",
+"62=EZViewer=https://download.ericzimmermanstools.com/net9/EZViewer.zip",
+"63=MFTExplorer=https://download.ericzimmermanstools.com/net9/MFTExplorer.zip",
+"64=SDBExplorer=https://download.ericzimmermanstools.com/net9/SDBExplorer.zip",
+"65=SQLECmd=https://download.ericzimmermanstools.com/net9/SQLECmd.zip",
+"66=WxTCmd=https://download.ericzimmermanstools.com/net9/WxTCmd.zip",
+"67=ChromeCacheView=https://www.nirsoft.net/utils/chromecacheview.zip",
+"68=BrowsingHistoryView=https://www.nirsoft.net/utils/browsinghistoryview-x64.zip",
+"69=VideoCacheView=https://www.nirsoft.net/utils/videocacheview-x64.zip"
 )
 
 Write-Host "Select tool(s) to download:`n" -ForegroundColor Yellow
@@ -90,12 +86,12 @@ foreach($t in $tools) {
     $parts = $t -split '='
     Write-Host "$($parts[0]). $($parts[1])"
 }
-Write-Host "74. Download All`n" -ForegroundColor Green
+Write-Host "70. Download All`n" -ForegroundColor Green
 
-$selection = Read-Host "Enter number(s) separated by comma (or 74 for all)"
+$selection = Read-Host "Enter number(s) separated by comma (or 70 for all)"
 
-if ($selection.Trim() -eq "74") {
-    $selected = 1..73
+if ($selection.Trim() -eq "70") {
+    $selected = 1..69
 } else {
     $selected = $selection -split ',' | ForEach-Object { $_.Trim() }
 }
@@ -110,8 +106,8 @@ foreach($num in $selected) {
 
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
         
-        if ($toolName -eq "Journal") {
-            Write-Host "⚠️ Opening in browser (Echo requires this)" -ForegroundColor Magenta
+        if ($toolName -eq "Journal" -or $toolName -eq "FTK Imager") {
+            Write-Host "⚠️ Opening in browser..." -ForegroundColor Magenta
             Start-Process $url
             Write-Host "✓ Link opened - check your browser/downloads" -ForegroundColor Yellow
             continue
@@ -131,7 +127,7 @@ foreach($num in $selected) {
             Write-Host " $($_.Exception.Message)" -ForegroundColor Red
             Write-Host " Try manually from: $url" -ForegroundColor Yellow
         }
-    } elseif ($num -ne 74) {
+    } elseif ($num -ne 70) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
     }
 }
