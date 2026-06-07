@@ -65,7 +65,7 @@ $tools = @(
 "53=SrumECmd=https://download.ericzimmermanstools.com/net9/SrumECmd.zip",
 "54=bstrings=https://download.ericzimmermanstools.com/net9/bstrings.zip",
 "55=RecentFileCacheParser=https://download.ericzimmermanstools.com/net9/RecentFileCacheParser.zip",
-"56=Journal=https://dl.echo.ac/tool/journal",
+"56=EchoEasyJournalViewer=https://dl.echo.ac/tool/journal",
 "57=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
 "58=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
 "59=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
