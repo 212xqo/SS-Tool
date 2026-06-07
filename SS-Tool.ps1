@@ -1,11 +1,9 @@
-# SS-Tool Downloader - Saves to real Downloads folder
-
-# Most reliable way to get the actual Downloads folder
+# SS-Tool Downloader 
 $shell = New-Object -ComObject Shell.Application
 $downloadsPath = $shell.Namespace('shell:Downloads').Self.Path
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "          SS-Tool Downloader" -ForegroundColor Cyan
+Write-Host " SS-Tool Downloader" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "`nFiles will be saved to your Downloads folder:" -ForegroundColor Yellow
 Write-Host $downloadsPath -ForegroundColor White
@@ -69,7 +67,23 @@ $tools = @(
 "55=bstrings=https://download.ericzimmermanstools.com/net9/bstrings.zip",
 "56=RecentFileCacheParser=https://download.ericzimmermanstools.com/net9/RecentFileCacheParser.zip",
 "57=AppCompatCacheParser=https://github.com/EricZimmerman/AppCompatCacheParser/releases/latest/download/AppCompatCacheParser.exe",
-"58=AmcacheParser=https://github.com/EricZimmerman/AmcacheParser/releases/latest/download/AmcacheParser.exe"
+"58=AmcacheParser=https://github.com/EricZimmerman/AmcacheParser/releases/latest/download/AmcacheParser.exe",
+"59=EchoJournal=https://dl.echo.ac/tool/journal",
+"60=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
+"61=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
+"62=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
+"63=RBCmd=https://download.ericzimmermanstools.com/net9/RBCmd.zip",
+"64=Hasher=https://download.ericzimmermanstools.com/hasher.zip",
+"65=EZViewer=https://download.ericzimmermanstools.com/net9/EZViewer.zip",
+"66=MFTExplorer=https://download.ericzimmermanstools.com/net9/MFTExplorer.zip",
+"67=SDBExplorer=https://download.ericzimmermanstools.com/net9/SDBExplorer.zip",
+"68=SQLECmd=https://download.ericzimmermanstools.com/net9/SQLECmd.zip",
+"69=WxTCmd=https://download.ericzimmermanstools.com/net9/WxTCmd.zip",
+"70=ProduKey=https://www.nirsoft.net/utils/produkey-x64.zip",
+"71=ChromeCacheView=https://www.nirsoft.net/utils/chromecacheview-x64.zip",
+"72=BrowsingHistoryView=https://www.nirsoft.net/utils/browsinghistoryview-x64.zip",
+"73=VideoCacheView=https://www.nirsoft.net/utils/videocacheview-x64.zip",
+"74=MyLastSearch=https://www.nirsoft.net/utils/mylastsearch-x64.zip"
 )
 
 Write-Host "Select tool(s) to download:`n" -ForegroundColor Yellow
@@ -77,12 +91,12 @@ foreach($t in $tools) {
     $parts = $t -split '='
     Write-Host "$($parts[0]). $($parts[1])"
 }
-Write-Host "59. Download All`n" -ForegroundColor Green
+Write-Host "75. Download All`n" -ForegroundColor Green
 
-$selection = Read-Host "Enter number(s) separated by comma (or 59 for all)"
+$selection = Read-Host "Enter number(s) separated by comma (or 75 for all)"
 
-if ($selection.Trim() -eq "59") {
-    $selected = 1..58
+if ($selection.Trim() -eq "75") {
+    $selected = 1..74
 } else {
     $selected = $selection -split ',' | ForEach-Object { $_.Trim() }
 }
@@ -104,9 +118,9 @@ foreach($num in $selected) {
             Write-Host "✓ Saved: $fileName" -ForegroundColor Yellow
         } catch {
             Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
-            Write-Host "   $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host " $($_.Exception.Message)" -ForegroundColor Red
         }
-    } elseif ($num -ne 59) {
+    } elseif ($num -ne 75) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
     }
 }
