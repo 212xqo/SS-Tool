@@ -55,35 +55,34 @@ $tools = @(
 "43=TaskSchedulerView=https://www.nirsoft.net/utils/taskschedulerview-x64.zip",
 "44=UninstallView=https://www.nirsoft.net/utils/uninstallview-x64.zip",
 "45=USBDriveLog=https://www.nirsoft.net/utils/usbdrivelog.zip",
-"46=Network Usage View=https://www.nirsoft.net/utils/network_usage_view.zip",
-"47=TimelineExplorer=https://download.ericzimmermanstools.com/net9/TimelineExplorer.zip",
-"48=JumpListExplorer=https://download.ericzimmermanstools.com/net9/JumpListExplorer.zip",
-"49=ShellBagsExplorer=https://download.ericzimmermanstools.com/net9/ShellBagsExplorer.zip",
-"50=RegistryExplorer=https://download.ericzimmermanstools.com/net9/RegistryExplorer.zip",
-"51=PECmd=https://download.ericzimmermanstools.com/net9/PECmd.zip",
-"52=MFTECmd=https://download.ericzimmermanstools.com/net9/MFTECmd.zip",
-"53=JLECmd=https://download.ericzimmermanstools.com/net9/JLECmd.zip",
-"54=SrumECmd=https://download.ericzimmermanstools.com/net9/SrumECmd.zip",
-"55=bstrings=https://download.ericzimmermanstools.com/net9/bstrings.zip",
-"56=RecentFileCacheParser=https://download.ericzimmermanstools.com/net9/RecentFileCacheParser.zip",
-"57=AppCompatCacheParser=https://github.com/EricZimmerman/AppCompatCacheParser/releases/latest/download/AppCompatCacheParser.exe",
-"58=AmcacheParser=https://github.com/EricZimmerman/AmcacheParser/releases/latest/download/AmcacheParser.exe",
-"59=Journal=https://dl.echo.ac/tool/journal",
-"60=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
-"61=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
-"62=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
-"63=RBCmd=https://download.ericzimmermanstools.com/net9/RBCmd.zip",
-"64=Hasher=https://download.ericzimmermanstools.com/hasher.zip",
-"65=EZViewer=https://download.ericzimmermanstools.com/net9/EZViewer.zip",
-"66=MFTExplorer=https://download.ericzimmermanstools.com/net9/MFTExplorer.zip",
-"67=SDBExplorer=https://download.ericzimmermanstools.com/net9/SDBExplorer.zip",
-"68=SQLECmd=https://download.ericzimmermanstools.com/net9/SQLECmd.zip",
-"69=WxTCmd=https://download.ericzimmermanstools.com/net9/WxTCmd.zip",
-"70=ProduKey=https://www.nirsoft.net/utils/produkey-x64.zip",
-"71=ChromeCacheView=https://www.nirsoft.net/utils/chromecacheview-x64.zip",
-"72=BrowsingHistoryView=https://www.nirsoft.net/utils/browsinghistoryview-x64.zip",
-"73=VideoCacheView=https://www.nirsoft.net/utils/videocacheview-x64.zip",
-"74=MyLastSearch=https://www.nirsoft.net/utils/mylastsearch-x64.zip"
+"46=TimelineExplorer=https://download.ericzimmermanstools.com/net9/TimelineExplorer.zip",
+"47=JumpListExplorer=https://download.ericzimmermanstools.com/net9/JumpListExplorer.zip",
+"48=ShellBagsExplorer=https://download.ericzimmermanstools.com/net9/ShellBagsExplorer.zip",
+"49=RegistryExplorer=https://download.ericzimmermanstools.com/net9/RegistryExplorer.zip",
+"50=PECmd=https://download.ericzimmermanstools.com/net9/PECmd.zip",
+"51=MFTECmd=https://download.ericzimmermanstools.com/net9/MFTECmd.zip",
+"52=JLECmd=https://download.ericzimmermanstools.com/net9/JLECmd.zip",
+"53=SrumECmd=https://download.ericzimmermanstools.com/net9/SrumECmd.zip",
+"54=bstrings=https://download.ericzimmermanstools.com/net9/bstrings.zip",
+"55=RecentFileCacheParser=https://download.ericzimmermanstools.com/net9/RecentFileCacheParser.zip",
+"56=AppCompatCacheParser=https://download.ericzimmermanstools.com/net9/AppCompatCacheParser.zip",
+"57=AmcacheParser=https://download.ericzimmermanstools.com/net9/AmcacheParser.zip",
+"58=Journal=https://dl.echo.ac/tool/journal",
+"59=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
+"60=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
+"61=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
+"62=RBCmd=https://download.ericzimmermanstools.com/net9/RBCmd.zip",
+"63=Hasher=https://download.ericzimmermanstools.com/hasher.zip",
+"64=EZViewer=https://download.ericzimmermanstools.com/net9/EZViewer.zip",
+"65=MFTExplorer=https://download.ericzimmermanstools.com/net9/MFTExplorer.zip",
+"66=SDBExplorer=https://download.ericzimmermanstools.com/net9/SDBExplorer.zip",
+"67=SQLECmd=https://download.ericzimmermanstools.com/net9/SQLECmd.zip",
+"68=WxTCmd=https://download.ericzimmermanstools.com/net9/WxTCmd.zip",
+"69=ProduKey=https://www.nirsoft.net/utils/produkey-x64.zip",
+"70=ChromeCacheView=https://www.nirsoft.net/utils/chromecacheview.zip",
+"71=BrowsingHistoryView=https://www.nirsoft.net/utils/browsinghistoryview-x64.zip",
+"72=VideoCacheView=https://www.nirsoft.net/utils/videocacheview-x64.zip",
+"73=MyLastSearch=https://www.nirsoft.net/utils/mylastsearch.zip"
 )
 
 Write-Host "Select tool(s) to download:`n" -ForegroundColor Yellow
@@ -91,12 +90,12 @@ foreach($t in $tools) {
     $parts = $t -split '='
     Write-Host "$($parts[0]). $($parts[1])"
 }
-Write-Host "75. Download All`n" -ForegroundColor Green
+Write-Host "74. Download All`n" -ForegroundColor Green
 
-$selection = Read-Host "Enter number(s) separated by comma (or 75 for all)"
+$selection = Read-Host "Enter number(s) separated by comma (or 74 for all)"
 
-if ($selection.Trim() -eq "75") {
-    $selected = 1..74
+if ($selection.Trim() -eq "74") {
+    $selected = 1..73
 } else {
     $selected = $selection -split ',' | ForEach-Object { $_.Trim() }
 }
@@ -112,14 +111,14 @@ foreach($num in $selected) {
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
         
         if ($toolName -eq "Journal") {
-            Write-Host "⚠️ Opening in browser (Echo requires this for download)" -ForegroundColor Magenta
+            Write-Host "⚠️ Opening in browser (Echo requires this)" -ForegroundColor Magenta
             Start-Process $url
             Write-Host "✓ Link opened - check your browser/downloads" -ForegroundColor Yellow
             continue
         }
         
         $fileName = $url.Split('/')[-1]
-        if (-not $fileName) { $fileName = "$toolName.exe" }
+        if (-not $fileName) { $fileName = "$toolName.zip" }
         $fullPath = Join-Path $downloadsPath $fileName
 
         try {
@@ -130,9 +129,9 @@ foreach($num in $selected) {
         } catch {
             Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
             Write-Host " $($_.Exception.Message)" -ForegroundColor Red
-            Write-Host " Try downloading manually from: $url" -ForegroundColor Yellow
+            Write-Host " Try manually from: $url" -ForegroundColor Yellow
         }
-    } elseif ($num -ne 75) {
+    } elseif ($num -ne 74) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
     }
 }
