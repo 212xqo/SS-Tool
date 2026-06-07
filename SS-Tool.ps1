@@ -1,5 +1,4 @@
 # SS-Tool Downloader - Saves to real Downloads folder
-# Most reliable way to get the actual Downloads folder
 $shell = New-Object -ComObject Shell.Application
 $downloadsPath = $shell.Namespace('shell:Downloads').Self.Path
 
@@ -109,17 +108,23 @@ foreach($num in $selected) {
         $parts = $entry -split '='
         $toolName = $parts[1]
         $url = $parts[2]
-        $fileName = $url.Split('/')[-1]
-        if (-not $fileName) { $fileName = "$toolName.exe" }  # Fallback
-        $fullPath = Join-Path $downloadsPath $fileName
 
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
         
+        if ($toolName -eq "Journal") {
+            Write-Host "⚠️ Opening in browser (Echo requires this for download)" -ForegroundColor Magenta
+            Start-Process $url
+            Write-Host "✓ Link opened - check your browser/downloads" -ForegroundColor Yellow
+            continue
+        }
+        
+        $fileName = $url.Split('/')[-1]
+        if (-not $fileName) { $fileName = "$toolName.exe" }
+        $fullPath = Join-Path $downloadsPath $fileName
+
         try {
             $wc = New-Object System.Net.WebClient
             $wc.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            $wc.Headers.Add("Referer", "https://echo.ac/")
-            
             $wc.DownloadFile($url, $fullPath)
             Write-Host "✓ Saved: $fileName" -ForegroundColor Yellow
         } catch {
@@ -133,7 +138,7 @@ foreach($num in $selected) {
 }
 
 Write-Host "`n========================================" -ForegroundColor Cyan
-Write-Host "All done! Open your Downloads folder in File Explorer to see the files." -ForegroundColor Cyan
+Write-Host "All done! Open your Downloads folder:" -ForegroundColor Cyan
 Write-Host $downloadsPath -ForegroundColor Yellow
 Write-Host "========================================" -ForegroundColor Cyan
 Pause
