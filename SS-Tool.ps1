@@ -1,4 +1,5 @@
-# SS-Tool Downloader 
+# SS-Tool Downloader - Saves to real Downloads folder
+# Most reliable way to get the actual Downloads folder
 $shell = New-Object -ComObject Shell.Application
 $downloadsPath = $shell.Namespace('shell:Downloads').Self.Path
 
@@ -68,7 +69,7 @@ $tools = @(
 "56=RecentFileCacheParser=https://download.ericzimmermanstools.com/net9/RecentFileCacheParser.zip",
 "57=AppCompatCacheParser=https://github.com/EricZimmerman/AppCompatCacheParser/releases/latest/download/AppCompatCacheParser.exe",
 "58=AmcacheParser=https://github.com/EricZimmerman/AmcacheParser/releases/latest/download/AmcacheParser.exe",
-"59=EchoJournal=https://dl.echo.ac/tool/journal",
+"59=Journal=https://dl.echo.ac/tool/journal",
 "60=LECmd=https://download.ericzimmermanstools.com/net9/LECmd.zip",
 "61=EvtxECmd=https://download.ericzimmermanstools.com/net9/EvtxECmd.zip",
 "62=RECmd=https://download.ericzimmermanstools.com/net9/RECmd.zip",
@@ -109,16 +110,22 @@ foreach($num in $selected) {
         $toolName = $parts[1]
         $url = $parts[2]
         $fileName = $url.Split('/')[-1]
+        if (-not $fileName) { $fileName = "$toolName.exe" }  # Fallback
         $fullPath = Join-Path $downloadsPath $fileName
 
         Write-Host "`nDownloading $toolName ..." -ForegroundColor Green
+        
         try {
             $wc = New-Object System.Net.WebClient
+            $wc.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            $wc.Headers.Add("Referer", "https://echo.ac/")
+            
             $wc.DownloadFile($url, $fullPath)
             Write-Host "✓ Saved: $fileName" -ForegroundColor Yellow
         } catch {
             Write-Host "✗ Failed to download $toolName" -ForegroundColor Red
             Write-Host " $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host " Try downloading manually from: $url" -ForegroundColor Yellow
         }
     } elseif ($num -ne 75) {
         Write-Host "Invalid number: $num" -ForegroundColor Red
